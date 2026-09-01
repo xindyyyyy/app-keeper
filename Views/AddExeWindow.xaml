@@ -1,0 +1,26 @@
+<Window x:Class="AppKeeper.Views.AddExeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="添加程序" Width="540" Height="238" WindowStartupLocation="CenterOwner"
+        KeyboardNavigation.TabNavigation="Cycle" Loaded="WindowLoaded"
+        ResizeMode="NoResize" ShowInTaskbar="False">
+  <Grid Margin="28,25">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <TextBlock Text="添加需要守护的程序" FontSize="21" FontWeight="SemiBold" />
+    <TextBlock Grid.Row="1" Text="选择一个 EXE，添加后会立即开始守护。" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,8,0,16" />
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+      <TextBox x:Name="PathBox" VerticalContentAlignment="Center" ToolTip="输入或浏览选择 EXE 文件路径" AutomationProperties.Name="程序路径" />
+      <Button Grid.Column="1" Content="浏览…" Margin="8,0,0,0" Click="BrowseClick" AutomationProperties.Name="浏览程序文件" />
+    </Grid>
+    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+      <Button Content="取消" IsCancel="True" Margin="0,0,8,0" AutomationProperties.Name="取消添加" />
+      <Button Content="添加并开始守护" IsDefault="True" Style="{StaticResource PrimaryButton}" Click="ConfirmClick" AutomationProperties.Name="添加并开始守护" />
+    </StackPanel>
+  </Grid>
+</Window>

@@ -1,0 +1,121 @@
+<Window x:Class="AppKeeper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="App Keeper" Width="448" Height="620" MinWidth="420" MinHeight="480"
+        WindowStartupLocation="Manual" WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
+        Loaded="WindowLoaded" Closing="WindowClosing">
+  <Border Background="{StaticResource WindowBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+  <Grid Margin="22,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Grid Margin="0,0,0,2" MouseLeftButtonDown="WindowDrag">
+      <StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <Border Width="36" Height="36" CornerRadius="9" Background="#E3EEFC" Margin="0,0,11,0">
+            <Path Data="M 18,5 L 29,10 L 29,18 C 29,25 24,30 18,34 C 12,30 7,25 7,18 L 7,10 Z M 12,18 L 16,22 L 24,13" Stroke="{StaticResource AccentBrush}" StrokeThickness="2.2" Fill="Transparent" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          </Border>
+          <StackPanel>
+            <TextBlock Text="App Keeper" FontSize="19" FontWeight="SemiBold" />
+            <TextBlock Text="让重要的程序保持运行" Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="0,3,0,0" />
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Text="{Binding GuardSummary}" Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="47,9,0,0" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+        <Button Content="×" FontSize="20" Padding="8,0" Background="Transparent" BorderBrush="Transparent" Foreground="{StaticResource MutedTextBrush}" Click="HideClick" ToolTip="隐藏到托盘" AutomationProperties.Name="隐藏到托盘" />
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="1" Margin="0,16,0,13">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="12" />
+        <ColumnDefinition Width="160" />
+      </Grid.ColumnDefinitions>
+      <CheckBox Grid.Column="0" Content="随 Windows 启动" IsChecked="{Binding StartWithWindows, Mode=TwoWay}" Checked="StartupChanged" Unchecked="StartupChanged" VerticalAlignment="Center" ToolTip="登录 Windows 后自动启动 App Keeper" AutomationProperties.Name="随 Windows 启动" />
+      <Button Grid.Column="2" Content="添加程序" Style="{StaticResource PrimaryButton}" Command="{Binding AddCommand}" ToolTip="添加一个需要守护的 EXE 程序" AutomationProperties.Name="添加程序" />
+    </Grid>
+
+    <Border Grid.Row="2" Background="#EAF3FF" BorderBrush="#CFE1FA" BorderThickness="1" CornerRadius="6" Padding="13,10" Margin="0,0,0,13" Visibility="{Binding HasNotice, Converter={StaticResource BoolToVisibilityConverter}}">
+      <TextBlock Text="{Binding NoticeText}" Foreground="#28588F" TextWrapping="Wrap" FontSize="12" />
+    </Border>
+
+    <Grid Grid.Row="3">
+      <Grid Visibility="{Binding HasApplications, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <Border Width="54" Height="54" CornerRadius="27" Background="#E7EEF8" HorizontalAlignment="Center" Margin="0,0,0,15">
+            <Path Data="M 27,11 L 41,17 L 41,27 C 41,36 35,42 27,45 C 19,42 13,36 13,27 L 13,17 Z" Stroke="{StaticResource AccentBrush}" StrokeThickness="2" Fill="Transparent" />
+          </Border>
+          <TextBlock Text="还没有守护程序" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" />
+          <TextBlock Text="添加一个 EXE，退出后会自动重新启动。" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,8,0,18" />
+          <Button Content="添加第一个程序" Style="{StaticResource PrimaryButton}" Command="{Binding AddCommand}" HorizontalAlignment="Center" ToolTip="选择第一个需要守护的 EXE" />
+        </StackPanel>
+      </Grid>
+
+      <ListView ItemsSource="{Binding Applications}" Visibility="{Binding HasApplications, Converter={StaticResource BoolToVisibilityConverter}}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListView.ItemContainerStyle>
+          <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem"><ContentPresenter /></ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </ListView.ItemContainerStyle>
+        <ListView.ItemTemplate>
+          <DataTemplate>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,14">
+              <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="48" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="38" Height="38" Background="#EEF2F6" CornerRadius="8" VerticalAlignment="Top">
+                  <Image Source="{Binding Icon}" Width="29" Height="29" AutomationProperties.Name="{Binding DisplayName}" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="11,0,8,0" VerticalAlignment="Center" MinWidth="120">
+                  <TextBlock Text="{Binding DisplayName}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="{Binding ExecutablePath}" Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="0,5,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding ExecutablePath}" />
+                  <TextBlock Text="{Binding ProcessText}" Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="0,3,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                  <Border Background="{Binding StatusBrush}" CornerRadius="5" Padding="9,5" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding StatusText}" Foreground="White" FontSize="11" FontWeight="SemiBold" />
+                  </Border>
+                  <TextBlock Text="{Binding ErrorText}" Foreground="{StaticResource DangerBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="11,13,0,0">
+                  <TextBlock Text="重启记录" Foreground="{StaticResource MutedTextBrush}" FontSize="11" />
+                  <TextBlock Text="{Binding RestartCountText}" FontSize="11" Margin="8,0,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,11,0,0">
+                  <Button Content="恢复" Style="{StaticResource PrimaryButton}" Padding="10,6" Margin="0,0,6,0" Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibilityConverter}}" Click="ResumeClick" ToolTip="恢复此程序的守护" AutomationProperties.Name="恢复守护" />
+                  <Button Content="移除" Padding="10,6" Click="RemoveClick" ToolTip="从守护列表移除，不会关闭目标程序" AutomationProperties.Name="移除守护项目" />
+                  <CheckBox IsChecked="{Binding IsGuardEnabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="12,0,0,0" ToolTip="开启或关闭守护" AutomationProperties.Name="开启或关闭守护" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ListView.ItemTemplate>
+      </ListView>
+    </Grid>
+
+    <StackPanel Grid.Row="4" Margin="0,16,0,0">
+      <TextBlock Text="{Binding ConfigPath, StringFormat=配置：{0}}" Foreground="{StaticResource MutedTextBrush}" FontSize="10" TextTrimming="CharacterEllipsis" ToolTip="{Binding ConfigPath}" />
+      <TextBlock Text="事件驱动监听 · 不占用后台轮询" Foreground="{StaticResource MutedTextBrush}" FontSize="10" Margin="0,5,0,0" />
+    </StackPanel>
+  </Grid>
+  </Border>
+</Window>
